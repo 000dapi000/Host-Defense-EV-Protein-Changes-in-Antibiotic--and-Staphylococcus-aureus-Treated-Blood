@@ -1,0 +1,1 @@
+This R code was used for the proteomics data analysis presented in the paper “Host-Defense EV Protein Changes in Antibiotic- and Staphylococcus aureus Treated Blood” by Dapi Menglin Chiang et al. (2025). Please refer to the paper for further details.
