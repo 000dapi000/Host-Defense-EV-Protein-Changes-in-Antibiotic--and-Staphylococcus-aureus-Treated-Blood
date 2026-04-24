@@ -6,7 +6,7 @@ library(tidyr)
 library(readr)
 
 # ---- [Set Working Directory] ----
-setwd("C:/Users/ga53hil/Desktop/P257_07_new_analysis")
+setwd("C:/Users/ga53hil/Desktop/adj_p_value_P257_07_new_analysis")
 
 # ---- [Load Data] ----
 data <- read.table("Adjusted_Normalized_P257_07.txt", 
@@ -34,8 +34,8 @@ comparisons <- list(
   list(name = "SA_vs_MOCK", group1_name = "SA", group2_name = "MOCK",
        group1_cols = c("SA_1", "SA_2", "SA_3", "SA_4", "SA_5", "SA_6"),
        group2_cols = c("MOCK_1", "MOCK_2", "MOCK_3", "MOCK_4", "MOCK_5", "MOCK_6")),
-  list(name = "Pip_Tazo_vs_SA", group1_name = "Pip_Tazo", group2_name = "SA",
-       group1_cols = c("Pip_Tazo_1", "Pip_Tazo_2", "Pip_Tazo_3", "Pip_Tazo_4", "Pip_Tazo_5", "Pip_Tazo_6"),
+  list(name = "PipTazo_vs_SA", group1_name = "PipTazo", group2_name = "SA",
+       group1_cols = c("PipTazo_1", "PipTazo_2", "PipTazo_3", "PipTazo_4", "PipTazo_5", "PipTazo_6"),
        group2_cols = c("SA_1", "SA_2", "SA_3", "SA_4", "SA_5", "SA_6")),
   list(name = "Vancomycin_vs_SA", group1_name = "Vancomycin", group2_name = "SA",
        group1_cols = c("Vancomycin_1", "Vancomycin_2", "Vancomycin_3", "Vancomycin_4", "Vancomycin_5", "Vancomycin_6"),
@@ -81,7 +81,9 @@ for (comp in comparisons) {
     }
   }
   
-  df$negLog10P <- -log10(df$p_value)
+  # ---- [BH Correction] ----
+  df$p_value_adj <- p.adjust(df$p_value, method = "BH")
+  df$negLog10P <- -log10(df$p_value_adj)
   
   # ---- [Annotation] ----
   df <- df %>%
@@ -140,7 +142,7 @@ for (comp in comparisons) {
     labs(
       title = "Volcano Plot",
       x = "Log10 Fold Change",
-      y = "-Log10 p-value"
+      y = "-Log10 adj p-value"
     ) +
     theme_minimal(base_size = 25) +
     theme(
@@ -162,7 +164,6 @@ for (comp in comparisons) {
 }
 
 cat("🎉 All volcano plots and result tables completed for P257_07!\n")
-
 
 ################################################################################
 ################################################################################
@@ -209,12 +210,12 @@ library(readr)
 library(openxlsx)
 
 # ---- [Working Directory] ----
-setwd("C:/Users/ga53hil/Desktop/P257_07_new_analysis")
+setwd("C:/Users/ga53hil/Desktop/adj_p_value_P257_07_new_analysis")
 
 # ---- [Comparisons List] ----
 comparisons <- list(
   list(name = "SA_vs_MOCK", group1 = "SA", group2 = "MOCK"),
-  list(name = "Pip_Tazo_vs_SA", group1 = "Pip_Tazo", group2 = "SA"),
+  list(name = "PipTazo_vs_SA", group1 = "PipTazo", group2 = "SA"),
   list(name = "Vancomycin_vs_SA", group1 = "Vancomycin", group2 = "SA"),
   list(name = "Moxifloxacin_vs_SA", group1 = "Moxifloxacin", group2 = "SA")
 )
@@ -365,7 +366,7 @@ library(stringr)
 library(tidyr)
 
 # ---- [Working Directory] ----
-setwd("C:/Users/ga53hil/Desktop/P257_07_new_analysis")
+setwd("C:/Users/ga53hil/Desktop/adj_p_value_P257_07_new_analysis")
 
 # ---- [Load Base Data] ----
 data <- read.table("Adjusted_Normalized_P257_07.txt",
@@ -422,7 +423,7 @@ write.xlsx(base_annot, "Base_Annotation_with_SA_Pathways.xlsx", rowNames = FALSE
 # ---- [Comparisons and Sources] ----
 comparisons <- list(
   SA_vs_MOCK = list(group1 = "SA", group2 = "MOCK"),
-  Pip_Tazo_vs_SA = list(group1 = "Pip_Tazo", group2 = "SA"),
+  PipTazo_vs_SA = list(group1 = "PipTazo", group2 = "SA"),
   Vancomycin_vs_SA = list(group1 = "Vancomycin", group2 = "SA"),
   Moxifloxacin_vs_SA = list(group1 = "Moxifloxacin", group2 = "SA")
 )
@@ -653,7 +654,7 @@ for (source in human_sources) {
   }
   
   enrich_clean <- enrich_data %>%
-    filter(!is.na(p_adj), p_adj < 0.05, Sig_protein_volcano > 2, !is.na(Genes), Genes != "") %>%
+    filter(!is.na(p_adj), p_adj < 0.05, Sig_protein_volcano > 1, !is.na(Genes), Genes != "") %>%
     filter(str_detect(tolower(Pathway), paste(tolower(sepsis_keywords), collapse = "|"))) %>%
     filter(!str_detect(tolower(Pathway), paste(tolower(exclude_keywords), collapse = "|"))) %>%
     mutate(
